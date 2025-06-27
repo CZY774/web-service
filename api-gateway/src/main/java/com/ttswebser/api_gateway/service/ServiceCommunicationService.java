@@ -48,4 +48,13 @@ public class ServiceCommunicationService {
                 .collectList()
                 .onErrorReturn(new ArrayList<>());
     }
+
+    public Mono<List<MataKuliahDTO>> getMataKuliahByDosen(String dosenNim) {
+    return webClient.get()
+            .uri("lb://matakuliah-service/api/matakuliah/dosen/" + dosenNim)
+            .retrieve()
+            .bodyToFlux(MataKuliahDTO.class)
+            .collectList();
+}
+
 }
