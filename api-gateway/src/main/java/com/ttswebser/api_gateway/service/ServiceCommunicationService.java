@@ -14,13 +14,15 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class ServiceCommunicationService {
-    
+
     private final WebClient webClient;
-    
+
     public ServiceCommunicationService(WebClient webClient) {
         this.webClient = webClient;
     }
-    
+
+    // service login
+
     // Get user data from user-service
     public Mono<UserResponseDTO> getUserData(String nim) {
         return webClient.get()
@@ -29,7 +31,7 @@ public class ServiceCommunicationService {
                 .bodyToMono(UserResponseDTO.class)
                 .onErrorReturn(new UserResponseDTO());
     }
-    
+
     // Get mata kuliah data from matakuliah-service
     public Mono<MataKuliahDTO> getMataKuliahData(Long id) {
         return webClient.get()
@@ -38,7 +40,7 @@ public class ServiceCommunicationService {
                 .bodyToMono(MataKuliahDTO.class)
                 .onErrorReturn(new MataKuliahDTO());
     }
-    
+
     // Get kartu studi from nilai-service
     public Mono<List<KartuStudiDTO>> getKartuStudiByNim(String nim) {
         return webClient.get()
@@ -50,11 +52,11 @@ public class ServiceCommunicationService {
     }
 
     public Mono<List<MataKuliahDTO>> getMataKuliahByDosen(String dosenNim) {
-    return webClient.get()
-            .uri("lb://matakuliah-service/api/matakuliah/dosen/" + dosenNim)
-            .retrieve()
-            .bodyToFlux(MataKuliahDTO.class)
-            .collectList();
-}
+        return webClient.get()
+                .uri("lb://matakuliah-service/api/matakuliah/dosen/" + dosenNim)
+                .retrieve()
+                .bodyToFlux(MataKuliahDTO.class)
+                .collectList();
+    }
 
 }

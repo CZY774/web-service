@@ -20,48 +20,48 @@ import com.ttswebser.user_service.service.UserService;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    
+
     @Autowired
     private UserService userService;
-    
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         return userService.register(user);
     }
-    
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         return userService.login(loginData.get("nim"), loginData.get("password"));
     }
-    
+
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
-    
+
     @GetMapping("/{nim}")
     public ResponseEntity<User> getUserByNim(@PathVariable String nim) {
         return userService.getUserByNim(nim)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PutMapping("/{nim}")
     public User updateUser(@PathVariable String nim, @RequestBody User user) {
         return userService.updateUser(nim, user);
     }
-    
+
     @DeleteMapping("/{nim}")
     public ResponseEntity<Void> deleteUser(@PathVariable String nim) {
         userService.deleteUser(nim);
         return ResponseEntity.ok().build();
     }
-    
+
     @GetMapping("/role/{role}")
     public List<User> getUsersByRole(@PathVariable String role) {
         return userService.getUsersByRole(role);
     }
-    
+
     @PostMapping("/{nim}/change-password")
     public ResponseEntity<?> changePassword(@PathVariable String nim, @RequestBody Map<String, String> passwordData) {
         return userService.changePassword(nim, passwordData.get("oldPassword"), passwordData.get("newPassword"));

@@ -13,10 +13,10 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    
+
     @Value("${jwt.secret}")
     private String secret;
-    
+
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
@@ -24,27 +24,32 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    
+
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
-    
+
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
-    
+
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
-    
+
     public boolean validateToken(String token) {
         try {
-            return !isTokenExpired(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token); // ini akan melempar exception kalau token tidak valid
+            return true;
         } catch (Exception e) {
+            System.out.println("[JWT] Invalid token: " + e.getMessage());
             return false;
         }
     }
-    
+
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
