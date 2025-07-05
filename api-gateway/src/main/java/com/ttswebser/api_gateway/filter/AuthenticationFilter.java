@@ -1,5 +1,9 @@
 package com.ttswebser.api_gateway.filter;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -17,6 +21,21 @@ public class AuthenticationFilter implements GlobalFilter {
 
         @Autowired
         private JwtUtil jwtUtil;
+
+        // Role-based access config
+        private static final Map<String, List<String>> roleAccessMap = new HashMap<>();
+
+        static {
+                // Akses hanya untuk dosen
+                roleAccessMap.put("/api/matakuliah/tambah", List.of("dosen"));
+                roleAccessMap.put("/api/matakuliah/edit", List.of("dosen"));
+                roleAccessMap.put("/api/matakuliah/delete", List.of("dosen"));
+
+                // Akses hanya untuk mahasiswa
+                roleAccessMap.put("/api/nilai/kartu-studi", List.of("mahasiswa"));
+
+                // Tambahkan aturan lain sesuai kebutuhan
+        }
 
         @Override
         public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -42,9 +61,15 @@ public class AuthenticationFilter implements GlobalFilter {
 
                         String role = jwtUtil.extractRole(token);
 
-                        // Check role-based access
-                        if (path.contains("/dosen") && !"dosen".equals(role)) {
-                                return onError(exchange, "Access denied", HttpStatus.FORBIDDEN);
+                        // Ganti pengecekan role per-path dengan roleAccessMap
+                        for (Map.Entry<String, List<String>> entry : roleAccessMap.entrySet()) {
+                                String protectedPath = entry.getKey();
+                                List<String> allowedRoles = entry.getValue();
+
+                                if (path.startsWith(protectedPath) && !allowedRoles.contains(role)) {
+                                        return onError(exchange, "Access denied for role: " + role,
+                                                        HttpStatus.FORBIDDEN);
+                                }
                         }
 
                 } catch (Exception e) {
